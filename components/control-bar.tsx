@@ -1,28 +1,40 @@
 type ControlBarProps = {
   isPlaying: boolean;
   chunkSize: 1 | 2 | 3;
-  isDark: boolean;
+  selectedTheme: string;
+  selectedAccent: string;
+  recallEnabled: boolean;
+  themeOptions: { id: string; label: string }[];
+  accentOptions: { id: string; label: string }[];
   onPlayPause: () => void;
   onRestart: () => void;
   onBack: () => void;
   onForward: () => void;
   onChunkChange: (size: 1 | 2 | 3) => void;
-  onThemeToggle: () => void;
+  onThemeChange: (themeId: string) => void;
+  onAccentChange: (accentId: string) => void;
+  onRecallToggle: () => void;
 };
 
 export function ControlBar({
   isPlaying,
   chunkSize,
-  isDark,
+  selectedTheme,
+  selectedAccent,
+  recallEnabled,
+  themeOptions,
+  accentOptions,
   onPlayPause,
   onRestart,
   onBack,
   onForward,
   onChunkChange,
-  onThemeToggle,
+  onThemeChange,
+  onAccentChange,
+  onRecallToggle,
 }: ControlBarProps) {
   const buttonClass =
-    "rounded border border-white/20 px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-neutral-200 transition hover:border-white/45 hover:bg-white/10";
+    "rounded border border-[var(--reader-control-border)] px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-[var(--reader-control-text)] transition hover:bg-[var(--reader-control-hover-bg)]";
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -39,15 +51,15 @@ export function ControlBar({
         +5
       </button>
 
-      <div className="ml-1 inline-flex rounded border border-white/20 p-1">
+      <div className="ml-1 inline-flex rounded border border-[var(--reader-control-border)] p-1">
         {[1, 2, 3].map((size) => (
           <button
             key={size}
             onClick={() => onChunkChange(size as 1 | 2 | 3)}
             className={`rounded px-2 py-1 text-xs transition ${
               chunkSize === size
-                ? "bg-red-500/80 text-white"
-                : "text-neutral-300 hover:bg-white/10"
+                ? "bg-[var(--reader-accent-strong)] text-white"
+                : "text-[var(--reader-control-text)] hover:bg-[var(--reader-control-hover-bg)]"
             }`}
           >
             {size}
@@ -55,8 +67,50 @@ export function ControlBar({
         ))}
       </div>
 
-      <button onClick={onThemeToggle} className={buttonClass}>
-        {isDark ? "Light" : "Dark"}
+      <div className="ml-1 inline-flex items-center gap-2">
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--reader-muted)]">
+          Theme
+        </span>
+        <div className="inline-flex rounded border border-[var(--reader-control-border)] p-1">
+          {themeOptions.map((theme) => (
+            <button
+              key={theme.id}
+              onClick={() => onThemeChange(theme.id)}
+              className={`rounded px-2 py-1 text-xs transition ${
+                selectedTheme === theme.id
+                  ? "bg-[var(--reader-accent-strong)] text-white"
+                  : "text-[var(--reader-control-text)] hover:bg-[var(--reader-control-hover-bg)]"
+              }`}
+            >
+              {theme.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="inline-flex items-center gap-2">
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--reader-muted)]">
+          Accent
+        </span>
+        <div className="inline-flex rounded border border-[var(--reader-control-border)] p-1">
+          {accentOptions.map((accent) => (
+            <button
+              key={accent.id}
+              onClick={() => onAccentChange(accent.id)}
+              className={`rounded px-2 py-1 text-xs transition ${
+                selectedAccent === accent.id
+                  ? "bg-[var(--reader-accent-strong)] text-white"
+                  : "text-[var(--reader-control-text)] hover:bg-[var(--reader-control-hover-bg)]"
+              }`}
+            >
+              {accent.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <button onClick={onRecallToggle} className={buttonClass}>
+        Recall {recallEnabled ? "On" : "Off"}
       </button>
     </div>
   );

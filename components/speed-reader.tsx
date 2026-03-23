@@ -13,8 +13,10 @@ import { getOrpIndex, shouldExtendDisplay } from "@/lib/reader-utils";
 
 export type SpeedReaderHandle = {
   togglePlay: () => void;
+  pause: () => void;
   restart: () => void;
   skipBy: (amount: number) => void;
+  jumpTo: (wordIndex: number, autoPlay?: boolean) => void;
 };
 
 type SpeedReaderProps = {
@@ -23,18 +25,15 @@ type SpeedReaderProps = {
   chunkSize: 1 | 2 | 3;
   onIndexChange: (index: number) => void;
   onPlayStateChange: (isPlaying: boolean) => void;
-  isDark: boolean;
 };
 
-function renderWord(word: string, isDark: boolean) {
+function renderWord(word: string) {
   const orp = getOrpIndex(word);
 
   return (
     <span key={`${word}-${orp}`} className="inline-flex">
       <span>{word.slice(0, orp)}</span>
-      <span className={isDark ? "text-red-400" : "text-red-600"}>
-        {word.charAt(orp)}
-      </span>
+      <span className="text-[var(--reader-accent)]">{word.charAt(orp)}</span>
       <span>{word.slice(orp + 1)}</span>
     </span>
   );
@@ -42,7 +41,7 @@ function renderWord(word: string, isDark: boolean) {
 
 export const SpeedReader = forwardRef<SpeedReaderHandle, SpeedReaderProps>(
   function SpeedReader(
-    { words, wpm, chunkSize, onIndexChange, onPlayStateChange, isDark },
+    { words, wpm, chunkSize, onIndexChange, onPlayStateChange },
     ref,
   ) {
     const [index, setIndex] = useState(0);
@@ -72,6 +71,14 @@ export const SpeedReader = forwardRef<SpeedReaderHandle, SpeedReaderProps>(
       [clampIndex],
     );
 
+    const jumpTo = useCallback(
+      (wordIndex: number, autoPlay = false) => {
+        setIndex(clampIndex(wordIndex));
+        setIsPlaying(totalWords > 0 ? autoPlay : false);
+      },
+      [clampIndex, totalWords],
+    );
+
     const restart = useCallback(() => {
       setIndex(0);
       setIsPlaying(false);
@@ -87,11 +94,15 @@ export const SpeedReader = forwardRef<SpeedReaderHandle, SpeedReaderProps>(
       });
     }, [totalWords]);
 
-    useImperativeHandle(ref, () => ({ togglePlay, restart, skipBy }), [
-      restart,
-      skipBy,
-      togglePlay,
-    ]);
+    const pause = useCallback(() => {
+      setIsPlaying(false);
+    }, []);
+
+    useImperativeHandle(
+      ref,
+      () => ({ togglePlay, pause, restart, skipBy, jumpTo }),
+      [jumpTo, pause, restart, skipBy, togglePlay],
+    );
 
     useEffect(() => {
       onIndexChange(index);
@@ -160,12 +171,12 @@ export const SpeedReader = forwardRef<SpeedReaderHandle, SpeedReaderProps>(
             <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
               {chunk.map((word, chunkIndex) => (
                 <span key={`${index + chunkIndex}-${word}`}>
-                  {renderWord(word, isDark)}
+                  {renderWord(word)}
                 </span>
               ))}
             </div>
           ) : (
-            <span className="text-neutral-500">No words loaded.</span>
+            <span className="text-[var(--reader-muted)]">No words loaded.</span>
           )}
         </div>
       </div>

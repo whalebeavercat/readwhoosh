@@ -5,7 +5,7 @@ type WPMSliderProps = {
 
 export function WPMSlider({ value, onChange }: WPMSliderProps) {
   return (
-    <label className="flex w-full flex-col gap-2 text-xs uppercase tracking-[0.22em] text-neutral-400">
+    <label className="flex w-full flex-col gap-2 text-xs uppercase tracking-[0.22em] text-[var(--reader-muted)]">
       WPM {value}
       <input
         type="range"
@@ -14,7 +14,7 @@ export function WPMSlider({ value, onChange }: WPMSliderProps) {
         step={10}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/15 accent-red-400"
+        className="h-1 w-full cursor-pointer appearance-none rounded-full bg-[var(--reader-progress-track)] accent-[var(--reader-accent)]"
       />
     </label>
   );
