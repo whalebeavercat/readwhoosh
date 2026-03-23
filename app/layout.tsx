@@ -15,8 +15,8 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RSVP Speed Reader",
-  description: "Read faster with focused RSVP pacing.",
+  title: "WhooshRead",
+  description: "Read faster with focused pacing in WhooshRead.",
 };
 
 export default function RootLayout({
