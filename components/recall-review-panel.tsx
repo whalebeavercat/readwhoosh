@@ -62,7 +62,7 @@ type SpacedReviewQueueProps = {
 
 export function SpacedReviewQueue({ dueCards, onRate }: SpacedReviewQueueProps) {
   return (
-    <div className="rounded border border-[var(--reader-control-border)] bg-[var(--reader-control-hover-bg)]/50 p-3">
+    <div className="rounded border border-[var(--reader-control-border)] bg-[var(--reader-control-hover-bg)] p-3">
       <div className="mb-2 flex items-center justify-between">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--reader-muted)]">
           Spaced Review Queue

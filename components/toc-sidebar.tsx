@@ -14,14 +14,14 @@ type TOCSidebarProps = {
 
 function getIndent(level: 1 | 2 | 3): string {
   if (level === 1) {
-    return "pl-2 text-[0.92rem] font-semibold text-[var(--reader-fg,#f3f4f6)]";
+    return "pl-2 text-[0.92rem] font-semibold text-[var(--reader-fg)]";
   }
 
   if (level === 2) {
-    return "pl-5 text-[0.84rem] font-medium text-[var(--reader-muted,#d1d5db)]";
+    return "pl-5 text-[0.84rem] font-medium text-[var(--reader-muted)]";
   }
 
-  return "pl-8 text-[0.8rem] font-normal text-[var(--reader-muted,#9ca3af)] opacity-85";
+  return "pl-8 text-[0.8rem] font-normal text-[var(--reader-muted)] opacity-90";
 }
 
 export function TOCSidebar({
@@ -57,7 +57,7 @@ export function TOCSidebar({
       </button>
 
       <aside
-        className={`border-[var(--reader-panel-border,var(--color-line))] bg-[var(--reader-panel-bg,var(--color-background))] backdrop-blur transition-transform duration-300 ${
+        className={`border-[var(--reader-panel-border)] bg-[var(--reader-panel-bg)] backdrop-blur transition-transform duration-300 ${
           layout === "reader"
             ? "fixed left-0 top-0 z-40 h-screen w-full max-w-[320px] border-r md:sticky md:top-0 md:z-auto md:h-screen md:w-[260px] md:max-w-[260px]"
             : "relative h-[28rem] w-full rounded border"
@@ -66,13 +66,13 @@ export function TOCSidebar({
         }`}
       >
         <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between border-b border-[var(--reader-control-border,var(--color-line))] px-4 py-3">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--reader-muted,var(--color-muted))]">
+          <div className="flex items-center justify-between border-b border-[var(--reader-control-border)] px-4 py-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--reader-muted)]">
               {title}
             </p>
             <button
               onClick={() => setIsOpen(false)}
-              className="rounded px-2 py-1 text-xs text-[var(--reader-muted,var(--color-muted))] hover:bg-[var(--reader-control-hover-bg,rgba(255,255,255,0.08))] md:hidden"
+              className="rounded px-2 py-1 text-xs text-[var(--reader-muted)] hover:bg-[var(--reader-control-hover-bg)] md:hidden"
               aria-label="Close table of contents"
             >
               Close
@@ -95,15 +95,15 @@ export function TOCSidebar({
                   }}
                   className={`group mb-1 flex w-full items-start gap-2 rounded py-2 pr-2 text-left transition ${
                     active
-                      ? "bg-[var(--reader-control-hover-bg,rgba(255,255,255,0.08))]"
-                      : "hover:bg-[var(--reader-control-hover-bg,rgba(255,255,255,0.06))]"
+                      ? "bg-[var(--reader-control-hover-bg)]"
+                      : "hover:bg-[var(--reader-control-hover-bg)]"
                   } ${getIndent(item.level)}`}
                 >
                   <span
                     className={`mt-1.5 h-2 w-2 shrink-0 rounded-full border ${
                       active
                         ? "border-[var(--reader-accent)] bg-[var(--reader-accent)]"
-                        : "border-[var(--reader-panel-border,var(--color-line))]"
+                        : "border-[var(--reader-panel-border)]"
                     }`}
                   />
                   <span className="min-w-0 flex-1">
@@ -114,7 +114,7 @@ export function TOCSidebar({
                     >
                       {item.label}
                     </span>
-                    <span className="mt-1 block pl-[10px] text-[11px] text-[var(--reader-muted,var(--color-muted))]">
+                    <span className="mt-1 block pl-[10px] text-[11px] text-[var(--reader-muted)]">
                       ~{minutes} min · {item.wordCount} words
                     </span>
                   </span>

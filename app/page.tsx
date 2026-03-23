@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TOCSidebar } from "@/components/toc-sidebar";
 import { cleanPDFPages, extractPDFLines } from "@/lib/pdf-cleaner";
 import { createPdfTOCRawText } from "@/lib/parseTOC";
+import { READER_ACCENT_OPTIONS, READER_THEME_OPTIONS } from "@/lib/reader-appearance";
 import { useReaderText } from "@/lib/reader-context";
 import { tokenizeText } from "@/lib/reader-utils";
 import { useTOC } from "@/lib/useTOC";
@@ -25,11 +26,20 @@ export default function Home() {
     setStartWordIndex,
     setPdfPreviewUrl,
     setPdfPageLocations,
+    readerTheme,
+    readerAccent,
+    setReaderTheme,
+    setReaderAccent,
   } = useReaderText();
   const [activeTab, setActiveTab] = useState<UploadTab>("text");
   const [status, setStatus] = useState("Paste or upload content to begin.");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const pdfObjectUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -39,16 +49,12 @@ export default function Home() {
     };
   }, []);
 
-  const isHydrated = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
-
   const safeText = isHydrated ? text : "";
   const safeSource = isHydrated ? source : "text";
   const safeTOCRawText = isHydrated ? tocRawText : "";
   const safeStartWordIndex = isHydrated ? startWordIndex : 0;
+  const safeReaderTheme = isHydrated ? readerTheme : READER_THEME_OPTIONS[0].id;
+  const safeReaderAccent = isHydrated ? readerAccent : READER_ACCENT_OPTIONS[0].id;
 
   const wordCount = useMemo(() => tokenizeText(safeText).length, [safeText]);
   const { items: tocItems, hasTOC, emptyMessage } = useTOC(
@@ -244,7 +250,7 @@ export default function Home() {
               {(["text", "image", "pdf"] as UploadTab[]).map((tab) => (
                 <button
                   key={tab}
-                onClick={() => setActiveTab(tab)}
+                  onClick={() => setActiveTab(tab)}
                   className={`rounded px-4 py-2 text-xs uppercase tracking-[0.2em] transition ${
                     activeTab === tab
                       ? "bg-red-500/85 text-white"
@@ -311,6 +317,54 @@ export default function Home() {
                 Starting from word {safeStartWordIndex + 1} based on your selected section.
               </p>
             )}
+
+            <div className="space-y-2 rounded border border-white/10 bg-white/5 p-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-400">
+                Reader Style
+              </p>
+
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+                  Theme
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {READER_THEME_OPTIONS.map((theme) => (
+                    <button
+                      key={theme.id}
+                      onClick={() => setReaderTheme(theme.id)}
+                      className={`rounded border px-2 py-1 text-[11px] transition ${
+                        safeReaderTheme === theme.id
+                          ? "border-[var(--color-accent)] bg-red-500/80 text-white"
+                          : "border-white/15 text-neutral-300 hover:bg-white/10"
+                      }`}
+                    >
+                      {theme.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+                  Color
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {READER_ACCENT_OPTIONS.map((accent) => (
+                    <button
+                      key={accent.id}
+                      onClick={() => setReaderAccent(accent.id)}
+                      className={`rounded border px-2 py-1 text-[11px] transition ${
+                        safeReaderAccent === accent.id
+                          ? "border-[var(--color-accent)] bg-red-500/80 text-white"
+                          : "border-white/15 text-neutral-300 hover:bg-white/10"
+                      }`}
+                    >
+                      {accent.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
 
             <button
               onClick={() => router.push("/reader")}

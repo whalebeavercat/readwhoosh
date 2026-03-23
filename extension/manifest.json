@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "WhooshRead",
+  "description": "Speed read any page with Whoosh RSVP overlay.",
+  "version": "0.1.0",
+  "permissions": ["storage", "activeTab", "tabs", "contextMenus"],
+  "host_permissions": ["<all_urls>", "https://whoosh.app/*"],
+  "background": {
+    "service_worker": "background/worker.js"
+  },
+  "action": {
+    "default_title": "WhooshRead",
+    "default_popup": "popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "polyfill/browser-polyfill.js",
+        "utils/extractor.js",
+        "utils/auth.js",
+        "utils/rsvp.js",
+        "content/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["content/token-bridge.js"],
+      "matches": ["https://whoosh.app/*"]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "whooshread@whoosh.app",
+      "strict_min_version": "109.0"
+    }
+  }
+}
