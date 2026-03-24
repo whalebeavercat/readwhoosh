@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:chrome": "node extension/build.js chrome",
+    "build:firefox": "node extension/build.js firefox"
   },
   "dependencies": {
     "next": "16.2.1",
@@ -20,9 +22,11 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "archiver": "^7.0.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "webextension-polyfill": "^0.12.0"
   }
 }

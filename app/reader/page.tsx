@@ -1,5 +1,6 @@
 'use client';
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   useCallback,
@@ -7,7 +8,6 @@ import {
   useMemo,
   useRef,
   useState,
-  useSyncExternalStore,
   type CSSProperties,
 } from "react";
 import { ControlBar } from "@/components/control-bar";
@@ -16,7 +16,12 @@ import { ProgressBar } from "@/components/progress-bar";
 import { RecallCheckModal, SpacedReviewQueue } from "@/components/recall-review-panel";
 import { SpeedReader, type SpeedReaderHandle } from "@/components/speed-reader";
 import { TOCSidebar } from "@/components/toc-sidebar";
+import { WordContextPanel } from "@/components/word-context-panel";
 import { WPMSlider } from "@/components/wpm-slider";
+import {
+  READER_ACCENT_OPTIONS,
+  READER_THEME_OPTIONS,
+} from "@/lib/reader-appearance";
 import { useReaderText } from "@/lib/reader-context";
 import { tokenizeText } from "@/lib/reader-utils";
 import {
@@ -32,95 +37,6 @@ import {
 } from "@/lib/spaced-review";
 import { useTOC } from "@/lib/useTOC";
 
-const THEME_OPTIONS = [
-  {
-    id: "midnight",
-    label: "Midnight",
-    vars: {
-      "--reader-bg": "#05070f",
-      "--reader-fg": "#f5f7ff",
-      "--reader-muted": "#9ca5bf",
-      "--reader-panel-bg": "rgba(6, 11, 24, 0.78)",
-      "--reader-panel-border": "rgba(173, 188, 255, 0.22)",
-      "--reader-link": "#a8b5da",
-      "--reader-link-hover": "#ffffff",
-      "--reader-control-border": "rgba(173, 188, 255, 0.28)",
-      "--reader-control-hover-bg": "rgba(163, 177, 234, 0.16)",
-      "--reader-control-text": "#e8ecff",
-      "--reader-progress-track": "rgba(173, 188, 255, 0.2)",
-    },
-  },
-  {
-    id: "paper",
-    label: "Paper",
-    vars: {
-      "--reader-bg": "#f8f3e8",
-      "--reader-fg": "#1c1914",
-      "--reader-muted": "#645f54",
-      "--reader-panel-bg": "rgba(255, 251, 241, 0.86)",
-      "--reader-panel-border": "rgba(66, 57, 40, 0.18)",
-      "--reader-link": "#725a2f",
-      "--reader-link-hover": "#3f2f1a",
-      "--reader-control-border": "rgba(66, 57, 40, 0.28)",
-      "--reader-control-hover-bg": "rgba(66, 57, 40, 0.1)",
-      "--reader-control-text": "#2a251d",
-      "--reader-progress-track": "rgba(66, 57, 40, 0.15)",
-    },
-  },
-  {
-    id: "ocean",
-    label: "Ocean",
-    vars: {
-      "--reader-bg": "#031722",
-      "--reader-fg": "#dff8ff",
-      "--reader-muted": "#84b6c8",
-      "--reader-panel-bg": "rgba(4, 30, 42, 0.8)",
-      "--reader-panel-border": "rgba(120, 220, 236, 0.26)",
-      "--reader-link": "#83e4ff",
-      "--reader-link-hover": "#ddf9ff",
-      "--reader-control-border": "rgba(120, 220, 236, 0.32)",
-      "--reader-control-hover-bg": "rgba(125, 220, 236, 0.15)",
-      "--reader-control-text": "#d8f7ff",
-      "--reader-progress-track": "rgba(120, 220, 236, 0.2)",
-    },
-  },
-] as const;
-
-const ACCENT_OPTIONS = [
-  {
-    id: "ember",
-    label: "Ember",
-    vars: {
-      "--reader-accent": "#f97316",
-      "--reader-accent-strong": "#ea580c",
-    },
-  },
-  {
-    id: "cyan",
-    label: "Cyan",
-    vars: {
-      "--reader-accent": "#06b6d4",
-      "--reader-accent-strong": "#0891b2",
-    },
-  },
-  {
-    id: "lime",
-    label: "Lime",
-    vars: {
-      "--reader-accent": "#84cc16",
-      "--reader-accent-strong": "#65a30d",
-    },
-  },
-  {
-    id: "rose",
-    label: "Rose",
-    vars: {
-      "--reader-accent": "#f43f5e",
-      "--reader-accent-strong": "#e11d48",
-    },
-  },
-] as const;
-
 type ReaderStyleVars = CSSProperties & Record<`--${string}`, string>;
 
 export default function ReaderPage() {
@@ -131,13 +47,18 @@ export default function ReaderPage() {
     startWordIndex,
     pdfPreviewUrl,
     pdfPageLocations,
+    readerTheme,
+    readerAccent,
     setStartWordIndex,
+    setReaderTheme,
+    setReaderAccent,
   } = useReaderText();
-  const isHydrated = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsHydrated(true);
+  }, []);
   const safeText = isHydrated ? text : "";
   const safeSource = isHydrated ? source : "text";
   const safeRaw = isHydrated ? tocRawText : "";
@@ -160,15 +81,14 @@ export default function ReaderPage() {
   const [reviewCards, setReviewCards] = useState<ReviewCard[]>(() => loadAllCards());
   const [recallTargetCardId, setRecallTargetCardId] = useState<string | null>(null);
   const [recallEnabled, setRecallEnabled] = useState(true);
-  const [selectedTheme, setSelectedTheme] = useState<(typeof THEME_OPTIONS)[number]["id"]>("midnight");
-  const [selectedAccent, setSelectedAccent] = useState<(typeof ACCENT_OPTIONS)[number]["id"]>("ember");
+  const [showLogo, setShowLogo] = useState(true);
   const promptedSectionsRef = useRef<Set<string>>(new Set());
   const previousSectionIndexRef = useRef(-1);
 
   const activeTheme =
-    THEME_OPTIONS.find((theme) => theme.id === selectedTheme) ?? THEME_OPTIONS[0];
+    READER_THEME_OPTIONS.find((theme) => theme.id === readerTheme) ?? READER_THEME_OPTIONS[0];
   const activeAccent =
-    ACCENT_OPTIONS.find((accent) => accent.id === selectedAccent) ?? ACCENT_OPTIONS[0];
+    READER_ACCENT_OPTIONS.find((accent) => accent.id === readerAccent) ?? READER_ACCENT_OPTIONS[0];
 
   const readerStyle = useMemo<ReaderStyleVars>(
     () => ({
@@ -328,6 +248,16 @@ export default function ReaderPage() {
     return (
       <main className="flex min-h-screen items-center justify-center px-4">
         <div className="max-w-xl rounded border border-white/15 bg-black/50 p-8 text-center">
+          {showLogo && (
+            <Image
+              src="/whoosh-logo.png"
+              alt="WhooshRead logo"
+              width={180}
+              height={52}
+              className="mx-auto mb-4 h-12 w-auto"
+              onError={() => setShowLogo(false)}
+            />
+          )}
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-400">
             No content found
           </p>
@@ -367,6 +297,13 @@ export default function ReaderPage() {
         )}
 
         <section className="relative min-w-0 flex-1">
+          <WordContextPanel
+            words={words}
+            currentWordIndex={index}
+            onJump={handleWordJump}
+            topClassName={safeSource === "pdf" && safePdfPreviewUrl ? "top-[26rem]" : "top-4"}
+          />
+
           {safeSource === "pdf" && safePdfPreviewUrl && safePdfPageLocations.length > 0 && (
             <PDFPreviewPanel
               pdfUrl={safePdfPreviewUrl}
@@ -398,7 +335,17 @@ export default function ReaderPage() {
               className="mx-auto flex w-full max-w-4xl flex-col gap-4 rounded border border-[var(--reader-panel-border)] bg-[var(--reader-panel-bg)] p-4 backdrop-blur"
             >
               <div className="flex flex-wrap items-center justify-between gap-3 text-xs uppercase tracking-[0.2em]">
-                <span className="text-[var(--reader-muted)]">
+                <span className="flex items-center gap-2 text-[var(--reader-muted)]">
+                  {showLogo && (
+                    <Image
+                      src="/whoosh-logo.png"
+                      alt="WhooshRead logo"
+                      width={74}
+                      height={20}
+                      className="h-5 w-auto"
+                      onError={() => setShowLogo(false)}
+                    />
+                  )}
                   Word {Math.min(index + 1, words.length)} / {words.length}
                 </span>
                 <Link
@@ -414,18 +361,18 @@ export default function ReaderPage() {
               <ControlBar
                 isPlaying={isPlaying}
                 chunkSize={chunkSize}
-                selectedTheme={selectedTheme}
-                selectedAccent={selectedAccent}
+                selectedTheme={readerTheme}
+                selectedAccent={readerAccent}
                 recallEnabled={recallEnabled}
-                themeOptions={THEME_OPTIONS.map(({ id, label }) => ({ id, label }))}
-                accentOptions={ACCENT_OPTIONS.map(({ id, label }) => ({ id, label }))}
+                themeOptions={READER_THEME_OPTIONS.map(({ id, label }) => ({ id, label }))}
+                accentOptions={READER_ACCENT_OPTIONS.map(({ id, label }) => ({ id, label }))}
                 onPlayPause={() => readerRef.current?.togglePlay()}
                 onRestart={() => readerRef.current?.restart()}
                 onBack={() => readerRef.current?.skipBy(-5)}
                 onForward={() => readerRef.current?.skipBy(5)}
                 onChunkChange={setChunkSize}
-                onThemeChange={(themeId) => setSelectedTheme(themeId as (typeof THEME_OPTIONS)[number]["id"])}
-                onAccentChange={(accentId) => setSelectedAccent(accentId as (typeof ACCENT_OPTIONS)[number]["id"])}
+                onThemeChange={(themeId) => setReaderTheme(themeId as (typeof READER_THEME_OPTIONS)[number]["id"])}
+                onAccentChange={(accentId) => setReaderAccent(accentId as (typeof READER_ACCENT_OPTIONS)[number]["id"])}
                 onRecallToggle={() => {
                   setRecallEnabled((prev) => {
                     const next = !prev;

@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "extension/polyfill/browser-polyfill.js",
+    "dist/**",
   ]),
 ]);
 

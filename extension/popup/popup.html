@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WhooshRead</title>
+    <style>
+      :root {
+        --bg: #0a0c10;
+        --panel: #11151d;
+        --line: #2c3544;
+        --text: #e7ecf6;
+        --muted: #95a2b8;
+        --accent: #ff4d00;
+      }
+      * { box-sizing: border-box; }
+      body {
+        width: 320px;
+        margin: 0;
+        background: radial-gradient(circle at top, #161f30 0%, var(--bg) 56%);
+        color: var(--text);
+        font-family: 'Courier New', Courier, monospace;
+      }
+      .wrap { padding: 14px; display: grid; gap: 10px; }
+      .state {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        border: 1px solid var(--line);
+        background: rgba(17, 21, 29, 0.8);
+        border-radius: 10px;
+        padding: 10px;
+      }
+      .user { display: flex; align-items: center; gap: 8px; min-width: 0; }
+      .avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 999px;
+        background: #2d3a51;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        font-size: 12px;
+      }
+      .avatar img { width: 100%; height: 100%; object-fit: cover; }
+      .email { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .btn {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font: 700 12px/1 'Courier New', Courier, monospace;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .btn:hover { background: #1a2332; }
+      .btn-primary { border-color: rgba(255, 77, 0, 0.48); }
+      .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+      .mini-btn {
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--text);
+        border-radius: 8px;
+        min-width: 30px;
+        height: 28px;
+        cursor: pointer;
+      }
+      a { color: var(--accent); font-size: 12px; text-decoration: none; }
+      .status { font-size: 11px; color: var(--muted); min-height: 14px; }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="state">
+        <div class="user">
+          <div id="avatar" class="avatar">W</div>
+          <img
+            src="../assets/whoosh-logo.png"
+            alt="Whoosh logo"
+            style="display:none;height:30px;width:auto;border-radius:6px"
+            onerror="this.style.display='none'"
+            onload="document.getElementById('avatar').style.display='none';this.style.display='block'"
+          />
+          <div>
+            <div id="authTitle">Not signed in</div>
+            <div id="authDetail" class="email">Sign in at whoosh.app</div>
+          </div>
+        </div>
+        <a id="signinLink" href="https://whoosh.app" target="_blank" rel="noopener noreferrer">Sign in</a>
+      </section>
+
+      <button id="readSelected" class="btn btn-primary">⚡ Read Selected</button>
+      <button id="readFullPage" class="btn">📄 Read Full Page</button>
+
+      <section class="state">
+        <div>
+          <div>WPM</div>
+          <div id="wpmValue" class="email">380</div>
+        </div>
+        <div class="row">
+          <button id="wpmDown" class="mini-btn">-</button>
+          <button id="wpmUp" class="mini-btn">+</button>
+        </div>
+      </section>
+
+      <div id="status" class="status"></div>
+      <div class="row">
+        <a href="https://whoosh.app" target="_blank" rel="noopener noreferrer">Open Whoosh App</a>
+      </div>
+    </main>
+
+    <script src="../polyfill/browser-polyfill.js"></script>
+    <script src="../utils/auth.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
